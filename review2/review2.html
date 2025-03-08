@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Microgrid Simulation</title>
+    <script>
+        function runSimulation() {
+            document.getElementById("output").innerHTML = "Running simulation... Please wait.";
+            setTimeout(() => {
+                let result = simulateMicrogrid();
+                document.getElementById("output").innerHTML = "Simulation Complete!<br>" + result;
+            }, 2000); // Simulating processing time
+        }
+
+        function simulateMicrogrid() {
+            // Simple example simulation (Replace with real calculations)
+            let frequency = 50;
+            let powerDemand = 0.5;
+            let output = "<b>Time Series Data:</b><br>";
+            
+            for (let t = 0; t < 10; t++) {
+                let adjustment = powerDemand > 0.8 ? -0.1 : (powerDemand < 0.2 ? 0.1 : 0);
+                powerDemand += adjustment;
+                frequency -= 0.05 * powerDemand;
+                output += `Time ${t}: Frequency = ${frequency.toFixed(2)} Hz, Power Demand = ${powerDemand.toFixed(2)}<br>`;
+            }
+            return output;
+        }
+    </script>
+</head>
+<body>
+    <h2>Microgrid Simulation</h2>
+    <button onclick="runSimulation()">Start</button>
+    <div id="output" style="margin-top:20px; font-family:monospace;"></div>
+</body>
+</html>
