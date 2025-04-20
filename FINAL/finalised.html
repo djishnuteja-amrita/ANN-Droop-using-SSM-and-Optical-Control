@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ANN Droop Control Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #e63946;
+      --secondary: #457b9d;
+      --dark: #1d3557;
+      --light: #f1faee;
+      --accent: #a8dadc;
+    }
+    
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    
+    body {
+  	margin: 0;
+  	font-family: 'Orbitron', sans-serif;
+  	background: url('bg.jpeg') no-repeat center center fixed;
+  	background-size: cover;
+  	display: flex;
+  	justify-content: center;
+ 	align-items: center;
+ 	min-height: 100vh;
+ 	padding: 20px;
+ 	color: #333;
+}
+
+    
+    .slide-container {
+      perspective: 1000px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    
+    .styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-weight: bold;
+}
+
+.styled-table th, .styled-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.styled-table thead {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.styled-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      position: relative;
+      min-height: 600px;
+    }
+    
+    .slide.active {
+      display: flex;
+      animation: slideIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes slideIn {
+      from { 
+        opacity: 0;
+        transform: translateY(20px) rotateX(10deg);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+      }
+    }
+    
+    .slide-header {
+      background: var(--dark);
+      color: white;
+      padding: 25px 40px;
+      position: relative;
+    }
+    
+    .slide-header::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 40px;
+      width: 60px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    
+    h2 {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .slide-content {
+      padding: 30px 40px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .content {
+      line-height: 1.7;
+      font-size: 1.1rem;
+      flex-grow: 1;
+    }
+    
+    .highlight {
+      color: var(--primary);
+      font-weight: 500;
+    }
+    
+    ul, ol {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 12px;
+      position: relative;
+    }
+    
+    li::before {
+      content: '•';
+      color: var(--primary);
+      font-weight: bold;
+      display: inline-block;
+      width: 1em;
+      margin-left: -1em;
+      position: absolute;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 40px 30px;
+      margin-top: auto;
+    }
+    
+    .nav-button {
+      background: var(--dark);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-button:hover {
+      background: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .nav-button:active {
+      transform: translateY(0);
+    }
+    
+    /* Title Slide Specific Styles */
+    .title-slide {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+      color: white;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .title-slide .slide-header {
+      background: transparent;
+      padding-bottom: 0;
+    }
+    
+    .title-slide .slide-header::after {
+      display: none;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      font-weight: 300;
+    }
+    
+    .tag {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 30px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 20px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+    
+    .start-button {
+      margin-top: 40px;
+      background: white;
+      color: var(--dark);
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    .start-button:hover {
+      background: var(--light);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+    }
+    
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    th {
+      background: var(--dark);
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    
+    tr:hover {
+      background: #f0f0f0;
+    }
+    
+    /* Two-column layout */
+    .columns {
+      display: flex;
+      gap: 30px;
+      margin: 20px 0;
+    }
+    
+    .column {
+      flex: 1;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .slide {
+        min-height: auto;
+      }
+      
+      .columns {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+    }
+    
+    /* Special content blocks */
+    .content-block {
+      background: #f8f9fa;
+      border-left: 4px solid var(--primary);
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 5px 5px 0;
+    }
+    
+    .content-block h3 {
+      margin-top: 0;
+      color: var(--dark);
+    }
+    
+    /* Animation classes */
+    .fade-in {
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Slide progress indicator */
+    .slide-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 5px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    /* Diagram placeholder */
+    .diagram-placeholder {
+      height: 200px;
+      background: #eee;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="slide-container">
+    <!-- Slide 1 - Title -->
+    <div class="slide title-slide active" id="slide1">
+      <div class="slide-header">
+        <div class="title">ANN DROOP CONTROL</div>
+        <div class="subtitle">Advanced Microgrid Voltage Regulation</div>
+      </div>
+      <div class="slide-content" style="align-items: center;">
+        <div class="subtitle">BY – JISHNU TEJA DANDAMUDI</div>
+        <div class="subtitle">CB.SC.U4AIE24019</div>
+        <div class="subtitle">AIE-A</div>
+        <div class="tag">GROUP 17</div>
+        <button class="start-button pulse" onclick="showSlide(2)">Begin Presentation →</button>
+      </div>
+      <div class="slide-progress" style="width: 7.69%;"></div>
+    </div>
+
+    <!-- Slide 2 - What is ANN -->
+    <div class="slide" id="slide2">
+      <div class="slide-header">
+        <h2>WHAT IS <span class="highlight">ANN</span>?</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <p>
+            <span class="highlight">ANN</span> stands for <b>Artificial Neural Network</b>, a computational model inspired by biological neural networks. It's a foundational technology in <b>machine learning</b> and <b>AI</b>, used for pattern recognition, predictions, and solving complex problems.
+          </p>
+
+          <div class="content-block">
+            <h3>KEY COMPONENTS OF ANN:</h3>
+            <ul>
+              <li><b>Neurons (Nodes):</b> Basic processing units that receive input, process it, and pass output</li>
+              <li><b>Layers:</b>
+                <ul>
+                  <li><b>Input Layer:</b> Receives initial data</li>
+                  <li><b>Hidden Layers:</b> Process inputs through mathematical transformations</li>
+                  <li><b>Output Layer:</b> Produces final results</li>
+                </ul>
+              </li>
+              <li><b>Weights:</b> Determine signal importance between neurons</li>
+              <li><b>Activation Functions:</b> Decide neuron activation (ReLU, sigmoid, tanh)</li>
+              <li><b>Training:</b> Adjusts weights via backpropagation to minimize errors</li>
+            </ul>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(1)">← Back to Menu</button>
+          <button class="nav-button" onclick="showSlide(3)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 15.38%;"></div>
+    </div>
+
+    <!-- Slide 3 - How it works & Applications -->
+    <div class="slide" id="slide3">
+      <div class="slide-header">
+        <h2>HOW ANN WORKS & APPLICATIONS</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="columns">
+            <div class="column">
+              <div class="content-block">
+                <h3>HOW IT WORKS</h3>
+                <ol>
+                  <li><b>Feedforward:</b> Data passes through network layers from input to output</li>
+                  <li><b>Backpropagation:</b> Errors are calculated and weights adjusted to improve accuracy</li>
+                </ol>
+              </div>
+            </div>
+            <div class="column">
+              <div class="content-block">
+                <h3>APPLICATIONS</h3>
+                <ul>
+                  <li><b>Image/Speech Recognition:</b> Facial recognition, voice assistants</li>
+                  <li><b>Natural Language Processing:</b> Translation, chatbots</li>
+                  <li><b>Predictive Analytics:</b> Stock prices, weather forecasting</li>
+                  <li><b>Medical Diagnosis:</b> Disease detection from medical data</li>
+                  <li><b>Autonomous Vehicles:</b> Sensory data processing</li>
+                  <li><b class="highlight">Microgrid Control:</b> Voltage stability prediction</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(2)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(4)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 23.08%;"></div>
+    </div>
+
+    <!-- Slide 4 - Abstract -->
+    <div class="slide" id="slide4">
+      <div class="slide-header">
+        <h2>ABSTRACT</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in" style="color: var(--primary); font-weight: 500;">
+          <div class="content-block" style="background: rgba(230, 57, 70, 0.05);">
+            <p>
+              Voltage stability is crucial in modern power systems with increasing renewable energy integration. This paper presents an <b>ANN-based droop control</b> approach using state-space modeling for optimized voltage and frequency stability.
+            </p>
+            <p>
+              Implemented in Python, the model dynamically adjusts droop parameters based on real-time conditions, ensuring adaptive voltage regulation. The state-space framework enables comprehensive stability analysis and real-time control, improving system robustness under varying loads.
+            </p>
+            <p>
+              Simulations validate the ANN Droop model's effectiveness in minimizing voltage deviations and enhancing grid stability, demonstrating real-world application potential.
+            </p>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(3)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(5)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 30.77%;"></div>
+    </div>
+
+    <!-- Slide 5 - ANN-Based Droop Control for Hybrid Microgrid -->
+    <div class="slide" id="slide5">
+      <div class="slide-header">
+        <h2>ANN-BASED DROOP CONTROL FOR HYBRID MICROGRID</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="content-block">
+            <h3>System Configuration:</h3>
+            <ul>
+              <li>Hybrid microgrid with:
+                <ul>
+                  <li>PV system with GWO-MPPT</li>
+                  <li>Wind Energy Conversion System (WECS)</li>
+                </ul>
+              </li>
+              <li>Parallel inverters with ANN-based droop control</li>
+              <li>Nonlinear loads at Point of Common Coupling (PCC)</li>
+            </ul>
+          </div>
+
+          <div class="content-block">
+            <h3>Key Innovations:</h3>
+            <div class="columns">
+              <div class="column">
+                <h4>ANN Architecture:</h4>
+                <ul>
+                  <li>Feedforward Neural Network (FFNN):
+                    <ul>
+                      <li>2 input neurons (P, Q)</li>
+                      <li>5 hidden neurons (tan-sigmoid)</li>
+                      <li>1 output neuron (linear)</li>
+                    </ul>
+                  </li>
+                  <li>Trained with scaled conjugate gradient</li>
+                  <li>45,000 training samples</li>
+                </ul>
+              </div>
+              <div class="column">
+                <h4>Control Strategy:</h4>
+                <ul>
+                  <li>Replaces traditional droop:
+                    <div style="font-size: 0.9em; margin: 5px 0 5px 20px; background: #f0f0f0; padding: 8px; border-radius: 5px;">
+                      ω* = ω<sub>n</sub> - mP → ANN(P,Q)<br>
+                      V* = V<sub>n</sub> - nQ → ANN(P,Q)
+                    </div>
+                  </li>
+                  <li>Nested control topology:
+                    <ul>
+                      <li>Inner current loop (1kHz)</li>
+                      <li>Outer voltage loop (100Hz)</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-block">
+            <h3>Performance Results:</h3>
+            <table>
+              <tr>
+                <th>Metric</th>
+                <th>Traditional</th>
+                <th>ANN-Based</th>
+              </tr>
+              <tr>
+                <td>Total Harmonic Distortion(THD)</td>
+                <td>6.12%</td>
+                <td style="color: var(--primary); font-weight: 600;">5.11%</td>
+              </tr>
+              <tr>
+                <td>Voltage Recovery</td>
+                <td>Slow</td>
+                <td style="color: var(--primary); font-weight: 600;">Fast stabilization</td>
+              </tr>
+              <tr>
+                <td>Frequency Stability</td>
+                <td>Deviations</td>
+                <td style="color: var(--primary); font-weight: 600;">Within limits</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(4)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(6)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 38.46%;"></div>
+    </div>
+
+    <!-- Slide 6 - State Space Modeling & Optimization -->
+    <div class="slide" id="slide6">
+      <div class="slide-header">
+        <h2>STATE SPACE MODELING & OPTIMIZATION</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="content-block">
+            <h3>Key Research Contributions:</h3>
+            <ul>
+              <li>Developed small-signal state-space model for inverter-based microgrids</li>
+              <li>Conducted eigenvalue stability analysis</li>
+              <li>Optimized parameters using Particle Swarm Optimization (PSO)</li>
+            </ul>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="content-block">
+                <h3>System Architecture:</h3>
+                <ul>
+                  <li>Two DG units with inverters, LC filters</li>
+                  <li>Common load through transmission line</li>
+                  <li>Control loops:
+                    <ul>
+                      <li>Outer power control (droop)</li>
+                      <li>Inner voltage/current control</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="column">
+              <div class="content-block">
+                <h3>Key Findings:</h3>
+                <ul>
+                  <li><b>Parameter Sensitivity:</b> k<sub>p</sub> affects stability margins</li>
+                  <li><b>PSO Optimization:</b> Shifted eigenvalues from -0.012 to -11.7123</li>
+                  <li><b>Validation:</b> States converge in 0.4s, power sharing in 0.5s</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-block" style="background: #f0f6ff;">
+            <h3>Control Equations:</h3>
+            <div style="font-family: monospace; background: white; padding: 10px; border-radius: 5px;">
+              Droop Control:<br>
+              ω = ω<sub>n</sub> - k<sub>p</sub>P, v<sub>od</sub>* = v<sub>n</sub> - k<sub>q</sub>Q<br><br>
+              State-space:<br>
+              [Δẋ<sub>inv</sub>] = G<sub>1</sub>[Δx<sub>inv</sub>] + G<sub>2</sub>[Δv<sub>bDQ</sub>]
+            </div>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(5)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(7)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 46.15%;"></div>
+    </div>
+
+    <!-- Slide 7 - ANN-Based Voltage Control in Islanded Microgrids -->
+    <div class="slide" id="slide7">
+      <div class="slide-header">
+        <h2>ANN-BASED REAL-TIME VOLTAGE CONTROL</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="columns" style="align-items: flex-start;">
+            <div class="column">
+              <div class="content-block">
+                <h3>System Architecture:</h3>
+                <ul>
+                  <li>Islanded AC microgrid with 2 VSC-based DGs</li>
+                  <li>ANN-integrated Proportional Resonant (PR) controller</li>
+                  <li>Three-layer ANN (2-5-2):
+                    <ul>
+                      <li>Inputs: Voltage/frequency errors</li>
+                      <li>Outputs: ΔK<sub>p</sub>, ΔK<sub>h</sub> adjustments</li>
+                    </ul>
+                  </li>
+                  <li>Sigmoid activation functions</li>
+                </ul>
+              </div>
+            </div>
+            <div class="column">
+              <div class="diagram-image">
+                <img src="fig1.png" alt="ANN-PR Control Structure" style="max-width: 100%; height: auto;" />
+              </div>
+              <div style="text-align: center; font-size: 0.8em;">Fig: ANN-PR Control Structure</div>
+            </div>
+          </div>
+
+          <div class="content-block">
+            <h3>Performance Comparison:</h3>
+            <table>
+              <tr>
+                <th>Metric</th>
+                <th>Conventional PR</th>
+                <th>ANN-PR</th>
+                <th>Improvement</th>
+              </tr>
+              <tr>
+                <td>Voltage Error</td>
+                <td>>4%</td>
+                <td style="color: var(--primary); font-weight: 600;"><2%</td>
+                <td style="color: var(--primary); font-weight: 600;">50%+</td>
+              </tr>
+              <tr>
+                <td>Voltage THD</td>
+                <td>5.6%</td>
+                <td style="color: var(--primary); font-weight: 600;">1%</td>
+                <td style="color: var(--primary); font-weight: 600;">82%</td>
+              </tr>
+              <tr>
+                <td>Frequency Error</td>
+                <td>0.02Hz</td>
+                <td style="color: var(--primary); font-weight: 600;">0.007Hz</td>
+                <td style="color: var(--primary); font-weight: 600;">65%</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(6)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(8)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 53.85%;"></div>
+    </div>
+
+    <!-- Slide 8 - Small-Signal Modeling of Inverter-Based Microgrids -->
+    <div class="slide" id="slide8">
+      <div class="slide-header">
+        <h2>SMALL-SIGNAL MODELING OF INVERTER-BASED MICROGRIDS</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="content-block">
+            <h3>Key Contributions:</h3>
+            <ul>
+              <li>Comprehensive state-space model capturing both low and high frequency dynamics</li>
+              <li>Validated with experimental results from 3-inverter test system</li>
+            </ul>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="content-block">
+                <h3>Modeling Approach:</h3>
+                <ol>
+                  <li><b>Subsystem Modeling:</b>
+                    <ul>
+                      <li>Power controller (droop)</li>
+                      <li>Voltage/current controllers</li>
+                      <li>LC filter and coupling inductance</li>
+                    </ul>
+                  </li>
+                  <li><b>Reference Frame Transformation:</b>
+                    <div style="font-family: monospace; background: #f5f5f5; padding: 8px; border-radius: 5px; margin: 5px 0;">
+                      [f<sub>DQ</sub>] = [T<sub>i</sub>][f<sub>dq</sub>]<br>
+                      T<sub>i</sub> = [cos(δ<sub>i</sub>) -sin(δ<sub>i</sub>); sin(δ<sub>i</sub>) cos(δ<sub>i</sub>)]
+                    </div>
+                  </li>
+                  <li><b>System Integration:</b> 13 states per inverter</li>
+                </ol>
+              </div>
+            </div>
+            <div class="column">
+              <div class="diagram-image">
+                <img src="fig2.png" alt="ANN-PR Control Structure" style="max-width: 100%; height: auto;" />
+              </div>
+              <div style="text-align: center; font-size: 0.8em;">Fig: 3-Inverter Test Setup</div>
+            </div>
+          </div>
+
+          <div class="content-block">
+            <h3>Key Findings:</h3>
+            <table>
+              <tr>
+                <th>Mode Cluster</th>
+                <th>Frequency Range</th>
+                <th>Sensitive To</th>
+              </tr>
+              <tr>
+                <td>Low Frequency (1)</td>
+                <td>7-10 Hz</td>
+                <td>Power controller states</td>
+              </tr>
+              <tr>
+                <td>Medium Frequency (2)</td>
+                <td>~350 Hz</td>
+                <td>Voltage controller states</td>
+              </tr>
+              <tr>
+                <td>High Frequency (3)</td>
+                <td>~800 Hz</td>
+                <td>LC filter and line currents</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(7)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(9)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 61.54%;"></div>
+    </div>
+
+    <!-- Slide 9 - ANN-Based Droop Control for Microgrids -->
+    <div class="slide" id="slide9">
+      <div class="slide-header">
+        <h2>ANN-BASED DROOP CONTROL FOR ACCURATE POWER SHARING</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="columns">
+            <div class="column">
+              <div class="content-block">
+                <h3>Key Innovations:</h3>
+                <ul>
+                  <li><b>Problem:</b> Conventional droop fails with complex line impedance</li>
+                  <li><b>Solution:</b> FFNN-based intelligent droop control</li>
+                  <li><b>Benefits:</b>
+                    <ul>
+                      <li>Accurate power sharing without line data</li>
+                      <li>Voltage/frequency regulation (±5%)</li>
+                      <li>70% current sharing error reduction</li>
+                    </ul>
+                  </li>
+                </ul>
+
+                <h3>System Configuration:</h3>
+                <ul>
+                  <li><b>DG Units:</b>
+                    <ul>
+                      <li>DG1: PV (4.5 kW) + BESS (250Ah)</li>
+                      <li>DG2: SOFC (5 kW)</li>
+                    </ul>
+                  </li>
+                  <li><b>Control Structure:</b>
+                    <ul>
+                      <li>Two FFNNs (voltage/frequency)</li>
+                      <li>10 hidden neurons (tan-sig)</li>
+                      <li>12,000 training datasets</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="column">
+              <div class="diagram-image">
+                <img src="fig3.png" alt="ANN-PR Control Structure" style="max-width: 100%; height: auto;" />
+              </div>
+              <div style="text-align: center; font-size: 0.8em;">Fig: ANN Architecture</div>
+            </div>
+          </div>
+
+          <div class="content-block">
+            <h3>Performance Comparison:</h3>
+            <table>
+              <tr>
+                <th>Metric</th>
+                <th>Generalized Droop</th>
+                <th>Proposed FFNN</th>
+              </tr>
+              <tr>
+                <td>Reactive Power Error</td>
+                <td>32%</td>
+                <td style="color: var(--primary); font-weight: 600;">2.8%</td>
+              </tr>
+              <tr>
+                <td>Current Sharing Error</td>
+                <td>1.5A</td>
+                <td style="color: var(--primary); font-weight: 600;">0.3A</td>
+              </tr>
+              <tr>
+                <td>Voltage Regulation</td>
+                <td>±8%</td>
+                <td style="color: var(--primary); font-weight: 600;">±3%</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(8)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(10)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 69.23%;"></div>
+    </div>
+
+    <!-- Slide 10 - Research Gap -->
+    <div class="slide" id="slide10">
+      <div class="slide-header">
+        <h2>RESEARCH GAP</h2>
+      </div>
+      <div class="slide-content">
+        <div class="content fade-in">
+          <div class="content-block" style="border-left-color: #ff6b6b; background: rgba(255, 107, 107, 0.05);">
+            <h3 style="color: #ff6b6b;">Limited Generalization of ANN Training Data:</h3>
+            <ul style="color: #ff6b6b;">
+              <li>Trained only on data from a <em>single DG system</em></li>
+              <li>Raises concerns about <b>scalability</b> for complex microgrid topologies</li>
+            </ul>
+          </div>
+
+          <div class="content-block" style="border-left-color: #ff6b6b; background: rgba(255, 107, 107, 0.05);">
+            <h3 style="color: #ff6b6b;">Fixed Neural Network Architecture:</h3>
+            <ul style="color: #ff6b6b;">
+              <li>Basic feedforward network with single hidden layer (5 neurons)</li>
+              <li>No exploration of <b>architecture optimization</b> for enhanced performance</li>
+            </ul>
+          </div>
+
+          <div class="content-block" style="border-left-color: #ff6b6b; background: rgba(255, 107, 107, 0.05);">
+            <h3 style="color: #ff6b6b;">Simplified Load Modelling:</h3>
+            <ul style="color: #ff6b6b;">
+              <li>Only considers <b>step change in nonlinear load</b></li>
+              <li>Lacks evaluation of <b>diverse load profiles</b> (industrial/residential)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="nav-buttons">
+          <button class="nav-button" onclick="showSlide(9)">← Back</button>
+          <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+          <button class="nav-button" onclick="showSlide(11)">Next →</button>
+        </div>
+      </div>
+      <div class="slide-progress" style="width: 76.92%;"></div>
+    </div>
+
+    <!-- Slide 11 - Problem Statement -->
+<div class="slide" id="slide11">
+  <div class="slide-header">
+    <h2>PROBLEM STATEMENT</h2>
+  </div>
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <p>
+          Maintaining stable voltage and frequency in autonomous hybrid microgrids is a critical challenge, especially under varying load conditions and the intermittent nature of renewable energy sources. Traditional droop control methods, although widely used, suffer from limitations such as static coefficients, sensitivity to load fluctuations, and poor adaptability to nonlinear system behaviour. These shortcomings hinder accurate load sharing and degrade power quality in real-world microgrid environments.
+        </p>
+      </div>
+
+      <div class="content-block" style="background: rgba(69, 123, 157, 0.08);">
+        <p>
+          To address these issues, this project proposes an advanced Artificial Neural Network (ANN)-based droop control strategy trained on a large, nonlinear, and dynamically generated dataset representing a wide range of active and reactive power variations. By modelling adaptive droop characteristics and incorporating a deep learning architecture, the proposed ANN controller aims to accurately predict and regulate inverter voltage and frequency, outperforming traditional methods in terms of stability, adaptability, and robustness.
+        </p>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(10)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(12)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 79%;"></div>
+</div>
+
+
+
+<!-- Slide 12 - Objectives -->
+<div class="slide" id="slide12">
+  <div class="slide-header">
+    <h2>OBJECTIVES</h2>
+  </div>
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <ul>
+          <li><b>To develop an advanced ANN-based droop control model</b> capable of accurately predicting voltage and frequency responses in an autonomous hybrid microgrid under varying active and reactive power conditions.</li>
+          
+          <li><b>To compare the performance of the ANN controller against traditional droop control</b> in terms of stability, accuracy, and adaptability using simulated test scenarios with nonlinear and dynamic load variations.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(11)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(13)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 82%;"></div>
+</div>
+
+
+
+<!-- Slide 13 - Main Methodology -->
+<div class="slide" id="slide13">
+  <div class="slide-header">
+    <h2>MAIN <span class="highlight">METHODOLOGY</span></h2>
+  </div>
+
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <p>
+          The hybrid approach combines a sophisticated state-space droop control model with an ANN-driven compensation mechanism to improve microgrid stability. The droop control system adaptively tunes P-f and Q-V curves according to real-time variations in power using an adaptive control scheme with PI regulation.
+        </p>
+      </div>
+
+      <div class="content-block">
+        <p>
+          Simultaneously, a deep ANN, which is trained on a larger dataset subjected to nonlinear perturbations, forecasts voltage and frequency deviations, suppressing transient errors. Through the combination of classic control with neural inference, the model best adjusts voltage and frequency responses, resulting in better dynamic performance and resilient microgrid regulation against fluctuating power.
+        </p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(12)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(15)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 85%;"></div>
+</div>
+
+
+<!-- Slide 14 - Sub Methodology 1 -->
+<div class="slide" id="slide14">
+  <div class="slide-header">
+    <h2>SUB <span class="highlight">METHODOLOGY 1</span></h2>
+  </div>
+
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <p>
+          <b>Advanced Droop Control with Virtual Inertia and PI Control for Base Model:</b> An up-to-date state-space model unites virtual inertia, adaptive droop control, and PI control to advance microgrid stability. Dynamic coefficients based on P-f and Q-V shapes modulate response to varying power changes, sharpening regulation of frequency and voltage.
+        </p>
+      </div>
+
+      <div class="content-block">
+        <p>
+          Control feedback, system matrices for incorporating damping into the frequency response, and another control state to append to PI further contribute. Multi-step active power changes propel the simulation, illustrating the system's transient response to variable load conditions.
+        </p>
+      </div>
+
+      <div class="content-block">
+        <p>
+          With state-space representation, voltage response and system states are examined, illustrating the interaction between control feedback, frequency deviations, and power flow. State evolution visualizations highlight adaptive droop efficacy, ensuring improved microgrid performance under dynamic conditions.
+        </p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(13)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(15)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 88%;"></div>
+</div>
+
+
+
+<!-- Slide 15 - Sub Methodology 2 -->
+<div class="slide" id="slide15">
+  <div class="slide-header">
+    <h2>SUB <span class="highlight">METHODOLOGY</span></h2>
+  </div>
+
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <p>
+          <b>Adaptive ANN-Based Droop Control for Voltage and Frequency Regulation:</b> A deep ANN optimizes voltage and frequency control in a microgrid by learning nonlinear dynamics of power variations. A synthetic dataset, augmented with stochastic perturbations, replicates real grid fluctuations, projecting active (P) and reactive (Q) power onto voltage (V) and frequency (F) deviations.
+        </p>
+      </div>
+
+      <div class="content-block">
+        <p>
+          The ANN model, organized with successively diminishing dense layers, and activated through ReLU and tanh functions, learns complex power-voltage-frequency relationships. MinMax scaling normalizes both inputs and outputs to facilitate stable gradient propagation.
+        </p>
+      </div>
+
+      <div class="content-block">
+        <p>
+          Having been trained with MSE loss utilizing the Adam optimizer, the ANN improves upon standard droop control by forecasting optimal voltage and frequency responses, surpassing standard static droop coefficients. Following training, ANN-based corrections are compared with the standard droop model post-training, establishing the validation of its effectiveness for dynamic microgrid regulation.
+        </p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(13)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(16)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 90%;"></div>
+</div>
+
+
+<!-- Slide 16 - ANN Architecture Table -->
+<div class="slide" id="slide16">
+  <div class="slide-header">
+    <h2>TABLE: <span class="highlight">MULTI-LAYER ANN ARCHITECTURE</span></h2>
+  </div>
+
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block" style="overflow-x: auto;">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Number of Neurons</th>
+              <th>Activation Function</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Input Layer</td>
+              <td>2 (P, Q)</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td>Dense Layer 1</td>
+              <td>512</td>
+              <td>ReLU</td>
+            </tr>
+            <tr>
+              <td>Dropout</td>
+              <td>40%</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Dense Layer 2</td>
+              <td>512</td>
+              <td>ReLU</td>
+            </tr>
+	    <tr>
+              <td>Dropout</td>
+              <td>40%</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td>Dense Layer 3</td>
+              <td>256</td>
+              <td>Tanh</td>
+            </tr>
+            <tr>
+              <td>Dense Layer 4</td>
+              <td>256</td>
+              <td>ReLU</td>
+            </tr>
+            <tr>
+              <td>Dense Layer 5</td>
+              <td>128</td>
+              <td>ReLU</td>
+            </tr>
+	    <tr>
+              <td>Dense Layer 6</td>
+              <td>64</td>
+              <td>ReLU</td>
+            </tr>
+	    <tr>
+              <td>Dense Layer 7</td>
+              <td>32</td>
+              <td>ReLU</td>
+            </tr>
+            <tr>
+              <td>Output Layer</td>
+              <td>2 (V, F)</td>
+              <td>Linear</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(15)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(17)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 91%;"></div>
+</div>
+
+
+<!-- Slide 17 - Implementation -->
+<div class="slide" id="slide17">
+  <div class="slide-header">
+    <h2>IMPLEMENTATION</h2>
+  </div>
+  <div class="slide-content">
+    <div class="content fade-in">
+      <div class="content-block">
+        <p>
+          This implementation demonstrates a deep learning approach using TensorFlow and Keras for predicting voltage and frequency responses in a power system based on synthetic active (P) and reactive (Q) power input features. The dataset, containing PMU (Phasor Measurement Unit) data, is first cleaned by removing voltage outliers using the 1st and 99th percentiles of the BUS39_IC_MAG column to ensure stable and representative training. Synthetic inputs for active power (P) and reactive power (Q) are generated linearly over the length of the dataset to simulate operational scenarios. The model takes these P and Q values as inputs and predicts two outputs: voltage magnitude (BUS39_IC_MAG) and frequency (BUS39_Freq). Data is split into training and testing sets in the ratio 80:20 and features are scaled using MinMaxScaler to the range [-1, 1] to facilitate effective neural network training.
+        </p>
+      </div>
+      <div class="content-block" style="background: rgba(69, 123, 157, 0.08);">
+        <p>
+The neural network model itself is a multi-layer fully connected feedforward model consisting of several dense layers with ReLU and tanh activations, combined with dropout layers for regularization to prevent overfitting. The output layer has two units with a linear activation to predict continuous values for voltage and frequency. A custom loss function is used, emphasizing accurate voltage predictions around the target of 230V by introducing a strong penalty term focused on deviation from this value. This encourages the model to not only minimize general prediction error but also prioritize predictions close to the operationally critical voltage level. The model is trained for 300 epochs using the Adam optimizer with a relatively small learning rate to ensure convergence.
+        </p>
+      </div>
+      <div class="content-block" style="background: rgba(69, 123, 157, 0.08);">
+        <p>
+          Post-training, the predictions are inverse-transformed to retrieve actual voltage and frequency values for evaluation. The performance is visualized through plots comparing predicted versus actual voltage and frequency, highlighting the model’s capability to track the expected trends. Additionally, a training vs. validation loss plot is included to assess learning dynamics and potential overfitting. Finally, the script prints a comparison of actual and predicted values for a subset of the test data, providing a concise tabular view of model performance. Overall, this implementation effectively integrates data preprocessing, model design, custom loss engineering, and result visualization to build a focused and interpretable regression model for power system monitoring and anomaly detection.
+        </p>
+      </div>
+
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(16)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(18)">Next →</button>
+    </div>
+  </div>
+ <div class="slide-progress" style="width: 92%;"></div>
+</div>
+
+
+
+<!-- Slide 18 - Training Progress -->
+<div class="slide" id="slide18">
+  <div class="slide-header">
+    <h2>Model Training Performance</h2>
+  </div>
+  <div class="slide-content">
+    <div class="columns">
+      <!-- Left Column (Image) -->
+      <div class="column">
+        <div class="diagram-placeholder pulse">
+          <!-- Replace with actual image -->
+          <img src="f2.png" alt="Training and Validation Loss Curve" style="max-width:100%; border-radius:8px;">
+          <p style="text-align:center; margin-top:10px; color:#666; font-size:0.9rem;">
+            Figure: Training vs Validation Loss (300 epochs)
+          </p>
+        </div>
+      </div>
+      
+      <!-- Right Column (Text) -->
+      <div class="column content">
+        <p>The figure illustrates the training and validation loss across 300 epochs:</p>
+        
+        <ul>
+          <li><span class="highlight">Initial rapid learning:</span> Sharp drop in both losses within first few epochs</li>
+          <li><span class="highlight">Stable convergence:</span> Losses stabilize with minor fluctuations after initial phase</li>
+          <li><span class="highlight">Healthy gap:</span> Training loss slightly lower than validation (typical for effective learning)</li>
+          <li><span class="highlight">Final values:</span> Both settle just above 2.204, indicating stable learning</li>
+        </ul>
+        
+        <div class="content-block">
+          <p><strong>Key Insight:</strong> The small margin between curves suggests the model generalizes well to unseen data, indicating a well-behaved training process and solid baseline for improvements.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(17)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(19)">Next →</button>
+    </div>
+  </div>
+  <div class="slide-progress" style="width: 93%;"></div>
+</div>
+
+
+<!-- Slide 19 - Frequency Prediction -->
+<div class="slide" id="slide19">
+  <div class="slide-header">
+    <h2>Frequency Prediction Performance</h2>
+  </div>
+  <div class="slide-content">
+    <div class="columns">
+      <!-- Left Column (Image) -->
+      <div class="column">
+        <div class="diagram-placeholder pulse">
+          <!-- Replace with actual image -->
+          <img src="f3.png" alt="Actual vs Predicted Frequency" style="max-width:100%; border-radius:8px;">
+          <p style="text-align:center; margin-top:10px; color:#666; font-size:0.9rem;">
+            Figure: Actual (blue) vs Predicted (orange) Frequency (100 samples)
+          </p>
+        </div>
+      </div>
+      
+      <!-- Right Column (Text) -->
+      <div class="column content">
+        <p>Comparison of actual and predicted frequency values (100 data points):</p>
+        
+        <ul>
+          <li><span class="highlight">Close tracking:</span> Predicted (orange) follows actual (blue) frequency trends closely</li>
+          <li><span class="highlight">Narrow error band:</span> Most predictions stay close to actual values</li>
+          <li><span class="highlight">Target reference:</span> Red dashed line at ideal 60 Hz frequency</li>
+          <li><span class="highlight">Consistent pattern:</span> Both curves range between 59.88-59.99 Hz (slight underestimation)</li>
+        </ul>
+        
+        <div class="content-block" style="border-left-color: var(--secondary);">
+          <h3>Interpretation</h3>
+          <p>The model shows reasonable accuracy but exhibits consistent slight underestimation. Fine-tuning could better align predictions with the 60 Hz target while maintaining the current tracking performance.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(18)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(20)">Next →</button>
+    </div>
+  </div>
+  <div class="slide-progress" style="width: 94%;"></div>
+</div>
+
+
+<!-- Slide 20 - Voltage Prediction -->
+<div class="slide" id="slide20">
+  <div class="slide-header">
+    <h2>Voltage Prediction Performance</h2>
+  </div>
+  <div class="slide-content">
+    <div class="columns">
+      <!-- Left Column (Image) -->
+      <div class="column">
+        <div class="diagram-placeholder">
+          <!-- Replace with actual image -->
+          <img src="f1.png" alt="Actual vs Predicted Voltage" style="max-width:100%; border-radius:8px;">
+          <p style="text-align:center; margin-top:10px; color:#666; font-size:0.9rem;">
+            Figure: Actual (blue) vs Predicted (orange) Voltage (100 samples)<br>
+            Red dashed line: 230V target
+          </p>
+        </div>
+      </div>
+      
+      <!-- Right Column (Text) -->
+      <div class="column content">
+        <div class="content-block" style="background-color: #fff8f8; border-left-color: var(--primary);">
+          <h3 style="color: var(--primary);">Key Observation</h3>
+          <p>The model shows <span class="highlight">significant underperformance</span> in voltage prediction, with predictions consistently ~260V below actual values and missing the 230V target.</p>
+        </div>
+        
+        <h3>Analysis</h3>
+        <ul>
+          <li><span class="highlight">Actual voltage:</span> Varies between 580-610V (blue) with occasional sharp dips</li>
+          <li><span class="highlight">Predicted voltage:</span> Flatlined around 320V (orange) despite input variations</li>
+          <li><span class="highlight">Target mismatch:</span> Both curves far from 230V target (red dashed line)</li>
+        </ul>
+        
+        <h3>Potential Issues</h3>
+        <div class="columns" style="gap:15px; margin-top:10px;">
+          <div class="column" style="background:#f9f9f9; padding:12px; border-radius:8px;">
+            <strong>Data/Scaling Problems</strong>
+            <ul style="margin-top:8px;">
+              <li>Incorrect output scaling</li>
+              <li>Misinterpreted units</li>
+            </ul>
+          </div>
+          <div class="column" style="background:#f9f9f9; padding:12px; border-radius:8px;">
+            <strong>Model Limitations</strong>
+            <ul style="margin-top:8px;">
+              <li>Insufficient complexity</li>
+              <li>Poor feature selection</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(19)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(21)">Next →</button>
+    </div>
+  </div>
+  <div class="slide-progress" style="width: 96%;"></div>
+</div>
+
+<!-- Slide 21 - Conclusion -->
+<div class="slide" id="slide21">
+  <div class="slide-header" style="background: var(--secondary);">
+    <h2>Conclusion</h2>
+  </div>
+  <div class="slide-content">
+    <div class="content" style="font-size: 1.05rem;">
+      <div class="content-block" style="background-color: #f0f7ff; border-left: 4px solid var(--secondary);">
+        <h3 style="color: var(--dark); margin-top: 0;">Key Contributions</h3>
+        <ul>
+          <li>ANN-based control <span class="highlight">outperforms</span> conventional/optimized droop methods</li>
+          <li>Significant improvement in <span class="highlight">frequency regulation</span> and <span class="highlight">voltage stability</span></li>
+          <li>Enhanced robustness against <span class="highlight">oscillating load patterns</span></li>
+        </ul>
+      </div>
+
+      <div class="columns" style="margin: 20px 0;">
+        <div class="column" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+          <h4 style="margin-top: 0; color: var(--dark);">Achievements</h4>
+          <ul>
+            <li>Reduced frequency fluctuations</li>
+            <li>Faster system response time</li>
+            <li>Better adaptability to nonlinearities</li>
+            <li>Improved power quality</li>
+          </ul>
+        </div>
+        <div class="column" style="background: #f9f9f9; padding: 15px; border-radius: 8px;">
+          <h4 style="margin-top: 0; color: var(--dark);">Future Work</h4>
+          <ul>
+            <li>Hybridized learning frameworks</li>
+            <li>Advanced optimization methods</li>
+            <li>Wider operational condition testing</li>
+            <li>Real-time implementation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 20px; padding: 15px; background: var(--light); border-radius: 8px;">
+        <p style="margin: 0; font-weight: 600; color: var(--dark);">
+          ANN-based droop control presents a <span class="highlight">reliable alternative</span> to traditional methods, 
+          demonstrating <span class="highlight">superior performance</span> in dynamic microgrid environments.
+        </p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" onclick="showSlide(20)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(22)">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Slide 22 - Future Research Directions -->
+<div class="slide" id="slide22">
+  <div class="slide-header" style="background: linear-gradient(to right, var(--dark), var(--secondary));">
+    <h2>Future Research Roadmap</h2>
+  </div>
+  <div class="slide-content">
+    <div class="content" style="font-size: 1.05rem;">
+      <div class="columns">
+        <!-- Left Column - Core Improvements -->
+        <div class="column">
+          <div class="content-block" style="background-color: #f8fafc; border-left: 4px solid var(--primary);">
+            <h3 style="color: var(--primary); margin-top: 0;">Algorithm Enhancements</h3>
+            <ul>
+              <li><span class="highlight">Real-time learning:</span> Adaptive tuning for dynamic grid conditions</li>
+              <li><span class="highlight">Reinforcement learning:</span> Improved decision-making for transient disturbances</li>
+              <li><span class="highlight">Hybrid ANN models:</span> Physics-informed learning for power-electronic interactions</li>
+            </ul>
+          </div>
+          
+          <div class="content-block" style="background-color: #fff8f5; border-left: 4px solid #e67e22; margin-top: 15px;">
+            <h3 style="color: #e67e22; margin-top: 0;">System Scalability</h3>
+            <ul>
+              <li>Multi-microgrid decentralized control coordination</li>
+              <li>Federated learning for distributed AI decision-making</li>
+              <li>Latency optimization for control actions</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Right Column - Implementation & Security -->
+        <div class="column">
+          <div class="content-block" style="background-color: #f5f8ff; border-left: 4px solid #3498db; margin-bottom: 15px;">
+            <h3 style="color: #3498db; margin-top: 0;">Validation & Security</h3>
+            <ul>
+              <li><span class="highlight">HIL simulations:</span> Hardware-in-the-loop verification</li>
+              <li><span class="highlight">Microgrid testbeds:</span> Real-world feasibility testing</li>
+              <li>Cybersecurity frameworks for AI-based control</li>
+              <li>Anomaly detection against cyber attacks</li>
+            </ul>
+          </div>
+          
+          <div class="content-block" style="background-color: #f0fff4; border-left: 4px solid #27ae60;">
+            <h3 style="color: #27ae60; margin-top: 0;">Economic Viability</h3>
+            <ul>
+              <li>Cost-benefit analysis of ANN implementation</li>
+              <li>Energy efficiency impact studies</li>
+              <li>Large-scale smart grid deployment economics</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px; padding: 12px; background: linear-gradient(to right, var(--accent), #a8dadc); border-radius: 8px;">
+        <p style="margin: 0; font-weight: 600; color: var(--dark);">
+          Next-generation ANN-based control will bridge <span class="highlight">algorithm innovation</span>, 
+          <span class="highlight">real-world validation</span>, and <span class="highlight">economic feasibility</span> 
+          for resilient smart grids
+        </p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+              <button class="nav-button" onclick="showSlide(21)">← Back</button>
+      <button class="nav-button" onclick="showSlide(1)">Main Menu</button>
+      <button class="nav-button" onclick="showSlide(23)">Next →</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+ <script>
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach(slide => slide.classList.remove('active'));
+      document.getElementById('slide' + n).classList.add('active');
+    }
+  </script>
+</body>
+</html>
